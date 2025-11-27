@@ -83,7 +83,7 @@ def visualize_graph(G):
         arrows=True,
         font_size=10,
     )
-    edge_labels = {(u, v): d["operation"] for u, v, d in G.edges(data=True)}
+    edge_labels = {(u, v): d.get("operation", "calls") for u, v, d in G.edges(data=True)}
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=9)
 
     plt.title("Left-to-Right DAG Layout (Manual Topological Levels)")
