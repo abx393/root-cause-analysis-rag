@@ -52,7 +52,7 @@ def compute_levels(G):
             levels[node] = max(levels[p] for p in preds) + 1
     return levels
 
-def visualize_diagram(G):
+def visualize_graph(G):
     levels = compute_levels(G)
 
     # Reverse map: level → list of nodes in that level
@@ -60,7 +60,7 @@ def visualize_diagram(G):
     for node, level in levels.items():
         layer_nodes[level].append(node)
 
-    # 3. Assign x,y positions manually
+    # Assign x,y positions manually
     pos = {}
     horizontal_spacing = 3  # spacing between levels (left→right)
     vertical_spacing = 2  # spacing between nodes vertically
@@ -73,7 +73,6 @@ def visualize_diagram(G):
             y = offset + i * vertical_spacing
             pos[node] = (x, y)
 
-    # 4. Draw graph
     plt.figure(figsize=(12, 6))
     nx.draw(
         G,
@@ -84,9 +83,28 @@ def visualize_diagram(G):
         arrows=True,
         font_size=10,
     )
+    edge_labels = {(u, v): d["operation"] for u, v, d in G.edges(data=True)}
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=9)
+
     plt.title("Left-to-Right DAG Layout (Manual Topological Levels)")
     plt.axis("off")
     plt.show()
+
+def graph_to_text(graph):
+    lines = []
+    try:
+        topo_order = list(nx.topological_sort(graph))
+    except nx.NetworkXUnfeasible:
+        raise ValueError("Graph is not a DAG; cannot do topological sort")
+
+    for node in topo_order:
+        lines.append(f"Node {node}")
+
+    for u, v, data in graph.edges(data=True):
+        rel = data.get("operation", "calls")
+        lines.append(f"Edge: {u} --({rel})--> {v}")
+
+    return "\n".join(lines)
 
 def main():
     csv_path = "dataset/RE3-OB/cartservice_f1/1/traces.csv"   # your file name
@@ -97,7 +115,8 @@ def main():
         print(e)
 
     G = build_graph(edges)
-    visualize_diagram(G)
+    visualize_graph(G)
+    print(graph_to_text(G))
 
 if __name__ == '__main__':
     main()
