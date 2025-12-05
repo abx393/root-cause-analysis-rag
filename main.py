@@ -1,48 +1,76 @@
-from enum import Enum
-import networkx as nx
-
+from typing import TypedDict
 from langchain_openai import ChatOpenAI
 
-from typing import TypedDict, Literal
+from graph_builder import (
+    extract_edges_from_trace,
+    build_graph,
+    compute_sccs,
+    build_scc_dag,
+    serialize_scc_dag_to_yaml,
+)
 
-from graph_builder import build_graph, build_scc_dag, compute_sccs, extract_edges_from_trace
 from log_parser import get_stacktrace_from_logs
 
 
+# -----------------------------
+# Structured output
+# -----------------------------
+class RCAResult(TypedDict):
+    root_cause_service: str
 
-# def invoke_llm(message):
-#     llm = ChatOpenAI(model="gpt-4o-mini")
-#     structured_llm = llm.with_structured_output(RCAResult)
 
-#     result = structured_llm.invoke(message)
-#     print(result)
+# -----------------------------
+# Build LLM prompt
+# -----------------------------
+def build_llm_message(graph_text: str, stacktrace: str) -> str:
+    return (
+        "You are performing Root Cause Analysis for a distributed microservice system.\n"
+        "Below is the microservice dependency graph:\n\n"
+        f"{graph_text}\n\n"
+        "Using ONLY this graph and the following stacktrace, identify the single service "
+        "most likely responsible for the failure.\n\n"
+        f"Stacktrace:\n{stacktrace}\n\n"
+        "Return ONLY the service name."
+    )
 
+
+# -----------------------------
+# LLM invocation wrapper
+# -----------------------------
+def invoke_llm(message):
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    structured = llm.with_structured_output(RCAResult)
+    return structured.invoke(message)
+
+
+# -----------------------------
+# MAIN — runs ONE example case
+# -----------------------------
 def main():
-    traces_path = "dataset/RE3-OB/cartservice_f1/1/traces.csv"   # your file name
+    # One example test case
+    traces_path = "dataset/RE3-OB/cartservice_f1/1/traces.csv"
+    logs_path   = "dataset/RE3-OB/cartservice_f1/1/logs.csv"
+
+    # Build graph
     edges = extract_edges_from_trace(traces_path)
-
-    print("Extracted edges:")
-    for e in edges:
-        print(e)
-
     G = build_graph(edges)
     scc_list, scc_map = compute_sccs(G)
     scc_dag = build_scc_dag(G, scc_map)
 
-    ServiceType = Enum("ServiceType", {node : node for node in scc_dag.nodes})
+    # Serialize to YAML
+    graph_text = serialize_scc_dag_to_yaml(scc_dag)
 
-    class RCAResult(TypedDict):
-        root_cause_service: ServiceType
+    # Extract raw stacktrace text
+    stacktraces = get_stacktrace_from_logs(logs_path)
+    first_stack = list(stacktraces)[0] if len(stacktraces) > 0 else ""
 
-    log_path = "dataset/RE3-OB/cartservice_f1/1/logs.csv"
-    stacktraces = get_stacktrace_from_logs(log_path)
-    first_stacktrace = list(stacktraces)[0]
+    # Build prompt
+    message = build_llm_message(graph_text, first_stack)
 
-    msg = f"Identify the root cause of the bug given the following stacktrace: {first_stacktrace}"
-    # invoke_llm(msg)
-    llm = ChatOpenAI(model="gpt-4o-mini")
-    result = llm.with_structured_output(RCAResult).invoke(msg)
-    print(result)
+    # Run LLM
+    result = invoke_llm(message)
+    print("LLM Prediction:", result)
+
 
 if __name__ == "__main__":
     main()
