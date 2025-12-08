@@ -23,7 +23,7 @@ def get_stacktrace_from_logs(csv_path):
 
     stacktrace_rows = df[mask]
     pd.set_option('display.max_colwidth', None)
-    print(stacktrace_rows["message"])
+    #print(stacktrace_rows["message"])
     return stacktrace_rows["message"]
 
 def main():
