@@ -1,31 +1,31 @@
-folder,case,ground_truth,prediction,correct
-adservice_f3,1,adservice,productcatalogservice,0
-adservice_f3,2,adservice,productcatalogservice,0
-adservice_f3,3,adservice,productcatalogservice,0
-adservice_f4,1,adservice,recommendationservice,0
-adservice_f4,2,adservice,recommendationservice,0
-adservice_f4,3,adservice,recommendationservice,0
-adservice_f5,1,adservice,AdService,1
-adservice_f5,2,adservice,AdService,1
-adservice_f5,3,adservice,adservice,1
-cartservice_f1,1,cartservice,cartservice,1
-cartservice_f1,2,cartservice,cartservice,1
-cartservice_f1,3,cartservice,cartservice,1
-currencyservice_f1,1,currencyservice,productcatalogservice,0
-currencyservice_f1,2,currencyservice,productcatalogservice,0
-currencyservice_f1,3,currencyservice,productcatalogservice,0
-emailservice_f1,1,emailservice,emailservice,1
-emailservice_f1,2,emailservice,emailservice,1
-emailservice_f1,3,emailservice,emailservice,1
-emailservice_f2,1,emailservice,emailservice,1
-emailservice_f2,2,emailservice,emailservice,1
-emailservice_f2,3,emailservice,emailservice,1
-emailservice_f3,1,emailservice,frontend,0
-emailservice_f3,2,emailservice,productcatalogservice,0
-emailservice_f3,3,emailservice,checkoutservice,0
-emailservice_f4,1,emailservice,productcatalogservice,0
-emailservice_f4,2,emailservice,productcatalogservice,0
-emailservice_f4,3,emailservice,productcatalogservice,0
-emailservice_f5,1,emailservice,emailservice,1
-emailservice_f5,2,emailservice,emailservice,1
-emailservice_f5,3,emailservice,emailservice,1
+folder,case,ground_truth,ranked_services
+adservice_f3,1,adservice,"['checkoutservice', 'currencyservice', 'paymentservice', 'emailservice', 'productcatalogservice', 'recommendationservice', 'frontend']"
+adservice_f3,2,adservice,"['checkoutservice', 'currencyservice', 'paymentservice', 'emailservice', 'frontend', 'recommendationservice', 'productcatalogservice']"
+adservice_f3,3,adservice,"['frontend', 'checkoutservice', 'productcatalogservice', 'recommendationservice', 'currencyservice', 'emailservice', 'paymentservice']"
+adservice_f4,1,adservice,"['recommendationservice', 'productcatalogservice', 'frontend', 'checkoutservice', 'emailservice', 'currencyservice', 'paymentservice']"
+adservice_f4,2,adservice,"['frontend', 'recommendationservice', 'checkoutservice', 'productcatalogservice', 'emailservice', 'currencyservice', 'paymentservice']"
+adservice_f4,3,adservice,"['recommendationservice', 'frontend', 'productcatalogservice', 'checkoutservice', 'currencyservice', 'emailservice', 'paymentservice']"
+adservice_f5,1,adservice,"['frontend', 'recommendationservice', 'checkoutservice', 'currencyservice', 'emailservice', 'paymentservice', 'productcatalogservice']"
+adservice_f5,2,adservice,"['frontend', 'checkoutservice', 'recommendationservice', 'currencyservice', 'emailservice', 'paymentservice', 'productcatalogservice']"
+adservice_f5,3,adservice,"['frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'emailservice', 'paymentservice']"
+cartservice_f1,1,cartservice,"['checkoutservice', 'frontend', 'currencyservice', 'productcatalogservice', 'recommendationservice', 'emailservice', 'paymentservice']"
+cartservice_f1,2,cartservice,"['checkoutservice', 'frontend', 'productcatalogservice', 'recommendationservice', 'currencyservice', 'paymentservice', 'emailservice']"
+cartservice_f1,3,cartservice,"['frontend', 'checkoutservice', 'productcatalogservice', 'recommendationservice', 'currencyservice', 'emailservice', 'paymentservice']"
+currencyservice_f1,1,currencyservice,"['frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'paymentservice', 'emailservice']"
+currencyservice_f1,2,currencyservice,"['frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'emailservice', 'paymentservice']"
+currencyservice_f1,3,currencyservice,"['frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'emailservice', 'paymentservice']"
+emailservice_f1,1,emailservice,"['emailservice', 'frontend', 'checkoutservice', 'recommendationservice', 'currencyservice', 'paymentservice', 'productcatalogservice']"
+emailservice_f1,2,emailservice,"['emailservice', 'currencyservice', 'paymentservice', 'checkoutservice', 'frontend', 'recommendationservice', 'productcatalogservice']"
+emailservice_f1,3,emailservice,"['emailservice', 'frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'paymentservice']"
+emailservice_f2,1,emailservice,"['emailservice', 'frontend', 'checkoutservice', 'recommendationservice', 'currencyservice', 'paymentservice', 'productcatalogservice']"
+emailservice_f2,2,emailservice,"['emailservice', 'checkoutservice', 'frontend', 'recommendationservice', 'currencyservice', 'paymentservice', 'productcatalogservice']"
+emailservice_f2,3,emailservice,"['emailservice', 'frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'paymentservice']"
+emailservice_f3,1,emailservice,"['frontend', 'checkoutservice', 'productcatalogservice', 'recommendationservice', 'currencyservice', 'paymentservice', 'emailservice']"
+emailservice_f3,2,emailservice,"['frontend', 'checkoutservice', 'productcatalogservice', 'recommendationservice', 'currencyservice', 'paymentservice', 'emailservice']"
+emailservice_f3,3,emailservice,"['checkoutservice', 'frontend', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'emailservice', 'paymentservice']"
+emailservice_f4,1,emailservice,"['frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'paymentservice', 'emailservice']"
+emailservice_f4,2,emailservice,"['frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'paymentservice', 'emailservice']"
+emailservice_f4,3,emailservice,"['frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'emailservice', 'paymentservice']"
+emailservice_f5,1,emailservice,"['emailservice', 'frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'paymentservice']"
+emailservice_f5,2,emailservice,"['emailservice', 'frontend', 'checkoutservice', 'recommendationservice', 'productcatalogservice', 'currencyservice', 'paymentservice']"
+emailservice_f5,3,emailservice,"['emailservice', 'paymentservice', 'currencyservice', 'frontend', 'recommendationservice', 'checkoutservice', 'productcatalogservice']"
