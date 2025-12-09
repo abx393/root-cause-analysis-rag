@@ -15,7 +15,7 @@ def get_stacktrace_from_logs(csv_path):
 
     combined_pattern = "(" + "|".join(stacktrace_patterns) + ")"
 
-    mask = df["message"].str.contains(
+    mask = df["message"].fillna("").str.contains(
         combined_pattern,
         flags=re.IGNORECASE | re.MULTILINE,
         regex=True

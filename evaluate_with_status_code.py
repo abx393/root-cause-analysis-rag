@@ -21,6 +21,7 @@ from trace_parser import get_error_code_from_trace
 # -----------------------------
 class RCARankedResult(TypedDict):
     ranked_services: List[str]
+    rationale: str
 
 
 # -----------------------------
@@ -41,8 +42,9 @@ def build_llm_message(graph_text: str, stacktrace: str, services: List[str], non
         service: {non_zero_status_trace['serviceName']}, method: {non_zero_status_trace['methodName']}, operation: {non_zero_status_trace['operationName']}, duration: {non_zero_status_trace['duration']}, status code: {non_zero_status_trace['statusCode']}
         The destination service of this operation may have an issue.
 
-        Rank ALL services from MOST likely root cause to LEAST likely.
-        Return ONLY JSON with field ranked_services.
+        Rank ALL services from MOST likely root cause to LEAST likely. 
+        Also provide a brief rationale for the top choice in your ranking.
+        Return ONLY JSON with two fields: ranked_services and rationale.
         
         Stacktrace:
         {stacktrace}
@@ -117,14 +119,17 @@ def evaluate():
 
             # ---- LLM call ----
             msg = build_llm_message(graph_text, stack, services, error_rows[idx])
-            ranked = invoke_llm(msg)["ranked_services"]
+            output = invoke_llm(msg)
+            ranked = output['ranked_services']
+            rationale = output['rationale']
+
 
             pred_top1 = ranked[0] if ranked else "none"
             correct = 1 if pred_top1.lower() == ground_truth.lower() else 0
 
             print(f"[{folder}/{case}] GT={ground_truth}, Pred@1={pred_top1}, correct={correct}")
 
-            results.append([folder, case, ground_truth, ranked])
+            results.append([folder, case, ground_truth, ranked, rationale])
             top1_results.append([ground_truth, pred_top1, correct])
 
     # ---------------------------------------------------
@@ -132,9 +137,9 @@ def evaluate():
     # ---------------------------------------------------
     with open(OUTPUT_RESULTS_PATH, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["folder", "case", "ground_truth", "ranked_services"])
-        for folder, case, gt, ranked in results:
-            writer.writerow([folder, case, gt, ";".join(ranked)])
+        writer.writerow(["folder", "case", "ground_truth", "ranked_services", "rationale"])
+        for folder, case, gt, ranked, rationale in results:
+            writer.writerow([folder, case, gt, ";".join(ranked), rationale])
 
     # ---------------------------------------------------
     # BASIC METRICS (Top-1 Accuracy + Per-Service)
@@ -167,7 +172,7 @@ def evaluate():
     # ---------------------------------------------------
     ac = [0 for i in range(6)]
 
-    for _, _, gt, ranked in results:
+    for _, _, gt, ranked, rationale in results:
         for i in range(1, 6):
             if gt in ranked[:i]: ac[i] += 1
 

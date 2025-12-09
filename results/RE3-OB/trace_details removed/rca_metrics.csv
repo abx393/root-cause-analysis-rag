@@ -1,0 +1,13 @@
+metric,value
+total_cases,30
+top1_accuracy,0.3
+AC@1,0.3
+AC@3,0.4
+AC@5,0.5333333333333333
+Avg@5,0.42000000000000004
+
+service,correct,total,accuracy
+adservice,0,9,0.0
+cartservice,0,3,0.0
+currencyservice,0,3,0.0
+emailservice,9,15,0.6
