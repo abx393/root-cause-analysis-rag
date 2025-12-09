@@ -38,7 +38,7 @@ def build_llm_message(graph_text: str, stacktrace: str, services: List[str], non
         {service_list}
         
         Here are the details of the trace with the most common non-zero status code among all traces:
-        {non_zero_status_trace['serviceName']}, method: {non_zero_status_trace['methodName']}, operation: {non_zero_status_trace['operationName']}, duration: {non_zero_status_trace['duration']}, status code: {non_zero_status_trace['statusCode']}
+        service: {non_zero_status_trace['serviceName']}, method: {non_zero_status_trace['methodName']}, operation: {non_zero_status_trace['operationName']}, duration: {non_zero_status_trace['duration']}, status code: {non_zero_status_trace['statusCode']}
         The destination service of this operation may have an issue.
 
         Rank ALL services from MOST likely root cause to LEAST likely.
@@ -62,6 +62,13 @@ def invoke_llm(message):
 # -----------------------------
 def evaluate():
     DATASET = "dataset/RE3-OB"
+
+    dataset_name = os.path.basename(DATASET.rstrip("/"))
+    OUTPUT_ROOT = os.path.join("results", dataset_name)
+    os.makedirs(OUTPUT_ROOT, exist_ok=True)
+
+    OUTPUT_RESULTS_PATH = os.path.join(OUTPUT_ROOT, "rca_outputs.csv")
+    OUTPUT_METRICS_PATH = os.path.join(OUTPUT_ROOT, "rca_metrics.csv")
 
     results = []  # [folder, case, gt, ranked_list]
     top1_results = []  # [gt, pred]
@@ -123,12 +130,11 @@ def evaluate():
     # ---------------------------------------------------
     # Write CSV
     # ---------------------------------------------------
-    out_path = "rca_results.csv"
-    with open(out_path, "w", newline="") as f:
+    with open(OUTPUT_RESULTS_PATH, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["folder", "case", "ground_truth", "ranked_services"])
-        for r in results:
-            writer.writerow(r)
+        for folder, case, gt, ranked in results:
+            writer.writerow([folder, case, gt, ";".join(ranked)])
 
     # ---------------------------------------------------
     # BASIC METRICS (Top-1 Accuracy + Per-Service)
@@ -171,6 +177,26 @@ def evaluate():
         avg5 += ac[i]
     avg5 /= 5
 
+    with open(OUTPUT_METRICS_PATH, "w", newline="") as f:
+        writer = csv.writer(f)
+
+        # Global metrics
+        writer.writerow(["metric", "value"])
+        writer.writerow(["total_cases", total])
+        writer.writerow(["top1_accuracy", accuracy])
+        writer.writerow(["AC@1", ac[1]])
+        writer.writerow(["AC@3", ac[3]])
+        writer.writerow(["AC@5", ac[5]])
+        writer.writerow(["Avg@5", avg5])
+
+        # Per-service accuracy
+        writer.writerow([])
+        writer.writerow(["service", "correct", "total", "accuracy"])
+
+        for svc, stats in service_stats.items():
+            svc_acc = stats["correct"] / stats["total"] if stats["total"] else 0
+            writer.writerow([svc, stats["correct"], stats["total"], svc_acc])
+
     print("\n================ RCAEval METRICS ================\n")
     print(f"Total Cases: {total}")
     print(f"AC@1: {ac[1]:.3f}")
@@ -179,7 +205,10 @@ def evaluate():
     print(f"Avg@5 (lower better): {avg5:.3f}")
     print("\n=================================================\n")
 
-    print(f"Evaluation complete! Results written to {out_path}")
+    print("Evaluation complete!")
+    print(f"Predictions written to: {OUTPUT_RESULTS_PATH}")
+    print(f"Metrics written to:     {OUTPUT_METRICS_PATH}")
+
 
 if __name__ == "__main__":
     evaluate()
