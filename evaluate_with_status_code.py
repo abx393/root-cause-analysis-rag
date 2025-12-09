@@ -40,7 +40,6 @@ def build_llm_message(graph_text: str, stacktrace: str, services: List[str], non
         
         Here are the details of the trace with the most common non-zero status code among all traces:
         service: {non_zero_status_trace['serviceName']}, method: {non_zero_status_trace['methodName']}, operation: {non_zero_status_trace['operationName']}, duration: {non_zero_status_trace['duration']}, status code: {non_zero_status_trace['statusCode']}
-        The destination service of this operation may have an issue.
 
         Rank ALL services from MOST likely root cause to LEAST likely. 
         Also provide a brief rationale for the top choice in your ranking.
