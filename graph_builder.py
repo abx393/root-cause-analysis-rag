@@ -6,11 +6,28 @@ import matplotlib.pyplot as plt
 import yaml
 matplotlib.use('TkAgg')
 
-def extract_edges_from_trace(csv_path):
-    # Load the trace as a DataFrame
-    df = pd.read_csv(csv_path)
+import re
 
-    # Index spans by spanID to allow parent lookup
+def extract_service_from_operation(op_name: str) -> str | None:
+    """
+    Examples:
+      hipstershop.AdService/GetAds -> adservice
+      grpc.hipstershop.CurrencyService/GetSupportedCurrencies -> currencyservice
+    """
+    if not isinstance(op_name, str):
+        return None
+
+    # match "...<ServiceName>/Method"
+    m = re.search(r'([\w\.]+Service)/', op_name)
+    if not m:
+        return None
+
+    # take last token after dots
+    service = m.group(1).split('.')[-1]
+    return service.lower()
+
+def extract_edges_from_trace(csv_path):
+    df = pd.read_csv(csv_path)
     spans = df.set_index("spanID")
 
     edges = set()
@@ -18,21 +35,29 @@ def extract_edges_from_trace(csv_path):
     for span_id, span in spans.iterrows():
         parent_id = span["parentSpanID"]
 
-        # skip root spans
         if pd.isna(parent_id) or parent_id == "":
             continue
+        if parent_id not in spans.index:
+            continue
 
-        # ensure parent span exists in the dataset
-        if parent_id in spans.index:
-            parent = spans.loc[parent_id]
+        parent = spans.loc[parent_id]
 
-            parent_service = str(parent["serviceName"]).lower()
-            child_service = str(span["serviceName"]).lower()
-            operation = span["operationName"]
+        parent_service = str(parent["serviceName"]).lower()
+        child_service = str(span["serviceName"]).lower()
+        operation = span["operationName"]
 
-            # record only cross-service calls
-            if parent_service != child_service:
-                edges.add((parent_service, child_service, operation))
+        # 1. Observed span-to-span service edge
+        if parent_service != child_service:
+            edges.add((parent_service, child_service, operation))
+
+        # 2. Operation-inferred outbound call (child → inferred)
+        inferred_service = extract_service_from_operation(operation)
+
+        if (
+            inferred_service
+            and inferred_service != child_service
+        ):
+            edges.add((child_service, inferred_service, operation))
 
     return list(edges)
 
@@ -175,8 +200,8 @@ def serialize_scc_dag_to_yaml(scc_dag):
     return yaml.dump(result, sort_keys=False)
 
 def main():
-    #csv_path = "dataset/RE3-OB/cartservice_f1/1/traces.csv"   # your file name
-    csv_path = "dataset/RE3-TT/ts-auth-service_f1/1/traces.csv"   # your file name
+    csv_path = "dataset/RE3-OB/adservice_f3/1/traces.csv"   # your file name
+    #csv_path = "dataset/RE3-TT/ts-auth-service_f1/1/traces.csv"   # your file name
     edges = extract_edges_from_trace(csv_path)
 
     print("Extracted edges:")
