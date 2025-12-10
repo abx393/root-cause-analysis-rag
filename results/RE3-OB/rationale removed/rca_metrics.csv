@@ -4,7 +4,7 @@ top1_accuracy,0.6
 AC@1,0.6
 AC@3,0.6333333333333333
 AC@5,0.7
-Avg@5,0.6466666666666667
+Avg@5,0.6333333333333334
 
 service,correct,total,accuracy
 adservice,6,9,0.6666666666666666
